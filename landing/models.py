@@ -68,16 +68,16 @@ class User(AbstractBaseUser, PermissionsMixin):
             'access': str(refresh.access_token)
         }
 
-@receiver(post_save, sender=User)
-def send_email_token(sender, instance, created, **kwargs):
-    if created:
-        try: 
-            subject = 'Your account needs to be verified'
-            message = f'Paste the link to verify your account http://localhost:8000/{uuid.uuid4()}/'
-            email_from = settings.EMAIL_HOST_USER
-            recipient_list = [instance.email]
-            send_mail(subject, message, email_from, recipient_list)
+# @receiver(post_save, sender=User)
+# def send_email_token(sender, instance, created, **kwargs):
+#     if created:
+#         try: 
+#             subject = 'Your account needs to be verified'
+#             message = f'Paste the link to verify your account http://localhost:8000/{uuid.uuid4()}/'
+#             email_from = settings.EMAIL_HOST_USER
+#             recipient_list = [instance.email]
+#             send_mail(subject, message, email_from, recipient_list)
 
-        except Exception as e:
-            print(e)
+#         except Exception as e:
+#             print(e)
   

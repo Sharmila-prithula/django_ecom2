@@ -1,3 +1,4 @@
+from django.db import models
 from rest_framework import serializers
 from .models import User
 from django.contrib import auth
@@ -17,7 +18,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'password']
+        fields = ['email', 'password', ]
 
     # def validate(self, attrs):
     #     email = attrs.get('email', '')
@@ -33,6 +34,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+class EmailVerificationSerializer(serializers.ModelSerializer):
+    email_verification_token = serializers.CharField(max_length=555)
+
+    class Meta:
+        model = User
+        fields = ['email_verification_token']
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, min_length=3)
