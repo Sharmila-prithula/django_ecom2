@@ -41,6 +41,13 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email_verification_token']
 
+class BecomeSellerSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=255, min_length=3)
+
+    class Meta:
+        model = User
+        fields = ['email']
+
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, min_length=3)
     password = serializers.CharField(
