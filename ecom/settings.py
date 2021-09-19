@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'landing',
+    'store',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -103,8 +104,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=365),
 }
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -136,7 +137,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+#USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -154,11 +155,6 @@ AUTHENTICATION_BACKENDS = [
 ]
  
 SITE_ID = 1
-#455222557904-pr6brk6lnv8lla809rq2o55u67m42647.apps.googleusercontent.com
-#5moIT7v_B0jMRWsOonuH_82X
-
-#1013470769477342
-#801ff44baa9be6250f60abda65fe21af
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

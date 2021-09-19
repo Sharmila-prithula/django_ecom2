@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework import generics, status, views, permissions
 from .serializers import (RegisterSerializer, SetNewPasswordSerializer, 
                             ResetPasswordEmailRequestSerializer, 
-                            LoginSerializer, LogoutSerializer, EmailVerificationSerializer)
+                            LoginSerializer, LogoutSerializer, EmailVerificationSerializer,
+                            BecomeSellerSerializer, MakeSellerSerializer)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
@@ -78,16 +79,8 @@ def send_mail_after_registration(email , token):
     recipient_list = [email]
     send_mail(subject, message , email_from ,recipient_list )
 
-def password_resetmail(email , token):
-    subject = 'Change your password using this.'
-    message = f'Hi paste the link to verify your account http://localhost:8000/landing/password-reset/{token}'
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [email]
-    send_mail(subject, message , email_from , recipient_list )
-
 class LoginAPIView(generics.GenericAPIView):
     serializer_class = LoginSerializer
-
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         email = request.data.get('email', '')
@@ -151,32 +144,47 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
 
-# class SellerCheckAPI(generics.GenericAPIView):
-#     serializer_class = BecomeSellerSerializer
-
-#     def get(self, request, uidb64, token):
-
-#         try:
-#             id = smart_str(urlsafe_base64_decode(uidb64))
-#             user = User.objects.get(id=id)
-
-#             if not PasswordResetTokenGenerator().check_token(user, token):
-#                 return Response({'status' : 404, 'errors' :'Token is not valid. Request another one.'})                    
-#             return Response({'status' : 200, 'message' :'Token valid','uidb64':uidb64 })
-
-#         except DjangoUnicodeDecodeError as identifier:
-#             if not PasswordResetTokenGenerator().check_token(user):
-#                 return Response({'status' : 404, 'errors' :'Token is not valid. Request another one.'})                    
-
-class LogoutAPIView(generics.GenericAPIView):
-    serializer_class = LogoutSerializer
-
-    permission_classes = (permissions.IsAuthenticated,)
-
+class BecomeSellerView(generics.GenericAPIView):
+    serializer_class = BecomeSellerSerializer
     def post(self, request):
+        serializer = self.serializer_class(data=request.data)
 
+        email = request.data.get('email', '')
+
+        if User.objects.filter(email=email).exists():
+            adm = User.objects.get(is_staff=True)
+            emailAdmin = adm.email
+            user = User.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            tokenid = uidb64 + "/" + token
+            subject = 'Make this user a seller'
+            message = f'Hi paste the link to make this account seller http://localhost:8000/landing/become-seller/{tokenid}'
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [emailAdmin]
+            send_mail(subject, message , email_from ,recipient_list )
+            return Response({'success': 'Wait for the admin approval'}, status=status.HTTP_200_OK)
+
+class SellerCheckAPI(generics.GenericAPIView):
+    #permissions_classes= (permissions.IsAuthenticated,)
+    def get(self, request, uidb64, token):
+
+        try:
+            id = smart_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(id=id)
+
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                return Response({'status' : 404, 'errors' :'Token is not valid. Request another one.'})                    
+            return Response({'status' : 200, 'message' :'Token valid','uidb64':uidb64, 'email':user.email})
+
+        except DjangoUnicodeDecodeError as identifier:
+            if not PasswordResetTokenGenerator().check_token(user):
+                return Response({'status' : 404, 'errors' :'Token is not valid. Request another one.'})                    
+
+class MakeSellerAPIView(generics.GenericAPIView):
+    serializer_class = MakeSellerSerializer
+    permission_classes = (permissions.IsAdminUser,)
+    def patch(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'success': True, 'message': 'Successfully changed this user seller status'}, status=status.HTTP_200_OK)
