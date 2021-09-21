@@ -1,5 +1,7 @@
 from django.shortcuts import render
+from rest_framework.permissions import AllowAny
 from rest_framework import generics
+from rest_framework import viewsets
 from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework.response import Response
@@ -8,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from landing.models import User
 from .serializers import *
+from .permissions import *
 import uuid
 # Create your views here.
 class VendorCreate(generics.CreateAPIView):
@@ -44,24 +47,88 @@ class ApproveVendorAPIView(generics.GenericAPIView):
             serializer.is_valid(raise_exception=True)
             
             return Response({'success': True, 'message': 'Successfully changed this active status', 'name':vendor.vendor_name, 'status':vendor.active}, status=status.HTTP_200_OK)
-        return Response({'status' : 404, 'errors' :'something went wrong'})
+        return Response({'status' : 404, 'errors' :'something went wrong'}) 
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
+    def get_queryset(self):
+        category = Category.objects.all()
+        return category
+
+
+class SubCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = SubCategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
+    def get_queryset(self):
+        category = SubCategory.objects.all()
+        return category
+
+    def create(self, request, *args, **kwargs):
+        data = request.data 
         
-class SellerCreate(APIView):
-    serializer_class = SellerSerializer
-    permission_classes = [IsAdminUser]
-
-    def post(self, request):
-        pk = self.kwargs.get('pk')
-        user = User.objects.get(pk=pk)
-        serializer = SellerSerializer(data=request.data)
-        if user.is_seller:
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data) 
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({'status' : 404, 'errors' :'User is not approved for seller.'})
-
+        category_obj = Category.objects.get(id=data["category"])
         
+        subcategory = SubCategory.objects.create(
+            subcategory_name=data["subcategory_name"], category=category_obj)
+        #subcategory.category.add(category_obj)
 
+        subcategory.save()
+        serializer = SubCategorySerializer(subcategory)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        data=request.data
+        instance = self.get_object()
+        serializer = self.serializer_class(instance, data)
+        serializer.is_valid(raise_exception=True)
+
+        #subcategory = SubCategory.objects.get(id=id)
+        instance.subcategory_name = data["subcategory_name"]
+        instance.description = data["description"]
+        instance.category= Category.objects.get(id=data["category"])
+        
+        instance.save()
+
+        serializer = SubCategorySerializer(instance)
+
+        return Response(serializer.data)
+
+class AttributeViewSet(viewsets.ModelViewSet):
+    serializer_class = AttributeSerializer
+
+    def get_queryset(self):
+        attribute = Attribute.objects.all()
+        return attribute
+
+    def create(self, request, *args, **kwargs):
+        data = request.data 
+
+        attribute = Attribute.objects.create(
+            attribute_name=data["attribute_name"])
+
+        attribute.save()
+
+        for subcategory in data["subcategories"]:
+            subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
+            attribute.subcategories.add(subcategory_obj)
+
+        serializer = AttributeSerializer(attribute)
+
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        data = request.data 
+
+        attribute = Attribute.objects.get(
+            attribute_name=data["attribute_name"])
+
+        attribute.save()
+
+        for subcategory in data["subcategories"]:
+            subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
+            attribute.subcategories.add(subcategory_obj)
+
+        serializer = AttributeSerializer(attribute)
+
+        return Response(serializer.data)

@@ -18,10 +18,20 @@ class ApproveVendorSerializer(serializers.Serializer):
     class Meta:
         model= Vendor
         fields = ['vendor_id']
-    
-class SellerSerializer(serializers.ModelSerializer):
-    vendor =  VendorSerializer(many=True, read_only=True)
 
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Seller
+        model= Category
         fields = "__all__"
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model= SubCategory
+        fields = "__all__"
+        depth = 1
+
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Attribute
+        fields = "__all__"
+        depth = 1

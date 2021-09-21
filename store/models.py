@@ -13,9 +13,33 @@ class Vendor(models.Model):
     def __str__(self):
         return str(self.vendor_name) 
 
-class Seller(models.Model):
-    name = models.CharField(max_length=30, blank=False)
-    user_seller = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='user_seller')
+
+class Category(models.Model):
+    category_name = models.CharField(max_length=200, unique=True, blank=False)
+    description = models.CharField(max_length=200, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return str(self.category_name)
+
+
+class SubCategory(models.Model):
+    subcategory_name = models.CharField(max_length=200, unique=True, blank=False)
+    description = models.CharField(max_length=200, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="subcategory")
+    created = models.DateTimeField(auto_now_add=True)
+    update = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.subcategory_name)
+
+class Attribute(models.Model):
+    attribute_name = models.CharField(max_length=200, unique=True, blank=False)
+    subcategories = models.ManyToManyField(SubCategory, related_name="attribute")
+    created = models.DateTimeField(auto_now_add=True)
+    update = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.attribute_name)
+
