@@ -94,41 +94,81 @@ class SubCategoryViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+
 class AttributeViewSet(viewsets.ModelViewSet):
     serializer_class = AttributeSerializer
-
+    permission_classes = [IsAdminOrReadOnly]
     def get_queryset(self):
-        attribute = Attribute.objects.all()
-        return attribute
+        category = Attribute.objects.all()
+        return category
 
     def create(self, request, *args, **kwargs):
         data = request.data 
-
         attribute = Attribute.objects.create(
             attribute_name=data["attribute_name"])
 
         attribute.save()
-
         for subcategory in data["subcategories"]:
             subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
             attribute.subcategories.add(subcategory_obj)
-
+        
         serializer = AttributeSerializer(attribute)
-
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        data = request.data 
+        data=request.data
+        instance = self.get_object()
+        serializer = self.serializer_class(instance, data)
+        serializer.is_valid(raise_exception=True)
 
-        attribute = Attribute.objects.get(
-            attribute_name=data["attribute_name"])
-
-        attribute.save()
-
+        #attribute = attribute.objects.get(id=id)
+        instance.attribute_name = data["attribute_name"]
         for subcategory in data["subcategories"]:
             subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
-            attribute.subcategories.add(subcategory_obj)
+            instance.subcategories.add(subcategory_obj)
+        
+        instance.save()
 
-        serializer = AttributeSerializer(attribute)
+        serializer = AttributeSerializer(instance)
 
         return Response(serializer.data)
+
+
+# class AttributeViewSet(viewsets.ModelViewSet):
+#     serializer_class = AttributeSerializer
+
+#     def get_queryset(self):
+#         attribute = Attribute.objects.all()
+#         return attribute
+
+#     def create(self, request, *args, **kwargs):
+#         data = request.data 
+
+#         attribute = Attribute.objects.create(
+#             attribute_name=data["attribute_name"])
+
+#         attribute.save()
+
+#         for subcategory in data["subcategories"]:
+#             subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
+#             attribute.subcategories.add(subcategory_obj)
+
+#         serializer = AttributeSerializer(attribute)
+
+#         return Response(serializer.data)
+
+#     def update(self, request, *args, **kwargs):
+#         data = request.data 
+
+#         attribute = Attribute.objects.get(
+#             attribute_name=data["attribute_name"])
+
+#         attribute.save()
+
+#         for subcategory in data["subcategories"]:
+#             subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
+#             attribute.subcategories.add(subcategory_obj)
+
+#         serializer = AttributeSerializer(attribute)
+
+#         return Response(serializer.data)
