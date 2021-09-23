@@ -7,11 +7,12 @@ router = DefaultRouter()
 router.register("attributes", AttributeViewSet, basename="attribute")
 router.register("categories", CategoryViewSet, basename="categories")
 router.register("subcategories", SubCategoryViewSet, basename="subcategories")
+#router.register("<int:pk>/products", ProductViewSet, basename="products")
 
 urlpatterns = [ 
     path('', include(router.urls)),
     path('vendor/',VendorCreate.as_view(), name= 'create-vendor'),
     path('approve-vendor/', ApproveVendorAPIView.as_view(), name= 'approve-vendor'),
-    # path('subcategories/', SubCategoryView.as_view(), name= 'subcategories'),
-    # path('subcategories/<int:pk>/', SubCategoryDetailView.as_view(), name= 'subcategories-detail'),
+    path('<int:pk>/products/', ProductView.as_view(), name='products'),
+    path('<int:pk>/products/<int:prok>/', ProductDetailView.as_view(), name='products-details')
 ]

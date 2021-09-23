@@ -53,7 +53,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsAdminOrReadOnly]
     def get_queryset(self):
-        category = Category.objects.all()
+        category= Category.objects.all()
         return category
 
 
@@ -71,7 +71,6 @@ class SubCategoryViewSet(viewsets.ModelViewSet):
         
         subcategory = SubCategory.objects.create(
             subcategory_name=data["subcategory_name"], category=category_obj)
-        #subcategory.category.add(category_obj)
 
         subcategory.save()
         serializer = SubCategorySerializer(subcategory)
@@ -133,42 +132,87 @@ class AttributeViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-
-# class AttributeViewSet(viewsets.ModelViewSet):
-#     serializer_class = AttributeSerializer
-
-#     def get_queryset(self):
-#         attribute = Attribute.objects.all()
-#         return attribute
+# class ProductViewSet(viewsets.ModelViewSet):
+#     serializer_class = ProductSerializer
+#     #permission_classes = [IsAdminOrReadOnly]
+#     def get_queryset(self, pk=None):
+#         pk = self.kwargs['pk']
+#         product = Product.objects.filter(vendor=pk)
+#         return product
 
 #     def create(self, request, *args, **kwargs):
 #         data = request.data 
-
-#         attribute = Attribute.objects.create(
-#             attribute_name=data["attribute_name"])
-
-#         attribute.save()
-
-#         for subcategory in data["subcategories"]:
-#             subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
-#             attribute.subcategories.add(subcategory_obj)
-
-#         serializer = AttributeSerializer(attribute)
-
+#         pk = self.kwargs.get('pk')
+        
+#         category = Category.objects.get(id=data["category"])
+#         subcategory = SubCategory.objects.get(id=data["subcategory"])
+#         vendor = Vendor.objects.get(id=pk)
+        
+#         product = Product.objects.create(product_name=data["product_name"], category=category, subcategory=subcategory, vendor=vendor)
+#         product.save()
+#         serializer = ProductSerializer(product)
 #         return Response(serializer.data)
 
 #     def update(self, request, *args, **kwargs):
-#         data = request.data 
+#         data=request.data
+#         pk = self.kwargs.get('pk')
+#         instance = self.get_object()
+#         category = Category.objects.get(id=data["category"])
+#         subcategory = SubCategory.objects.get(id=data["subcategory"])
+#         vendor = Vendor.objects.get(id=pk)
+#         serializer = self.serializer_class(instance, data)
+#         serializer.is_valid(raise_exception=True)
 
-#         attribute = Attribute.objects.get(
-#             attribute_name=data["attribute_name"])
+#         instance.product_name= data["product_name"]
+#         instance.category = category
+#         instance.subcategory = subcategory
+#         instance.vendor = vendor        
+#         instance.save()
 
-#         attribute.save()
-
-#         for subcategory in data["subcategories"]:
-#             subcategory_obj = SubCategory.objects.get(id=subcategory["id"])
-#             attribute.subcategories.add(subcategory_obj)
-
-#         serializer = AttributeSerializer(attribute)
+#         serializer = ProductSerializer(instance)
 
 #         return Response(serializer.data)
+
+class ProductView(APIView):
+    def get(self, request, pk):
+        product = Product.objects.filter(vendor=pk)
+        serializer = ProductSerializer(product, many=True) 
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        data=request.data
+        category = Category.objects.get(id=data["category"])
+        subcategory = SubCategory.objects.get(id=data["subcategory"])
+        vendor = Vendor.objects.get(id=pk)
+        
+        product = Product.objects.create(product_name=data["product_name"], category=category, subcategory=subcategory, vendor=vendor)
+        product.save()
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+
+class ProductDetailView(APIView):
+    def get(self, request, pk, prok):
+        vendor = Vendor.objects.get(id=pk)
+        product = Product.objects.get(id=prok)
+        serializer = ProductSerializer(product) 
+        return Response(serializer.data)
+
+    def put(self, request, pk, prok):
+        data=request.data
+        pk = self.kwargs.get('pk')
+        product = Product.objects.get(id=prok)
+        category = Category.objects.get(id=data["category"])
+        subcategory = SubCategory.objects.get(id=data["subcategory"])
+        vendor = Vendor.objects.get(id=pk)
+        product.category=category
+        product.subcategory=subcategory
+        serializer = ProductSerializer(product, data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request,pk, prok):
+        product = Product.objects.get(id=prok)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
