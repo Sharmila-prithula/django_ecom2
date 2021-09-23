@@ -48,6 +48,7 @@ class Product(models.Model):
     description = models.CharField(max_length=200, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="product")
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name="product")
+    attributes = models.ManyToManyField(Attribute, related_name="product")
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name="product")
     created = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)

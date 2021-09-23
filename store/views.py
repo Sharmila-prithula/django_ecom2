@@ -1,4 +1,6 @@
+import re
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from rest_framework import viewsets
@@ -174,6 +176,7 @@ class AttributeViewSet(viewsets.ModelViewSet):
 #         return Response(serializer.data)
 
 class ProductView(APIView):
+    permission_classes = [IsOwner]
     def get(self, request, pk):
         product = Product.objects.filter(vendor=pk)
         serializer = ProductSerializer(product, many=True) 
@@ -181,29 +184,44 @@ class ProductView(APIView):
 
     def post(self, request, pk):
         data=request.data
+        obj = Vendor.objects.get(id=pk)
+        self.check_object_permissions(self.request, obj)
         category = Category.objects.get(id=data["category"])
         subcategory = SubCategory.objects.get(id=data["subcategory"])
-        vendor = Vendor.objects.get(id=pk)
-        
-        product = Product.objects.create(product_name=data["product_name"], category=category, subcategory=subcategory, vendor=vendor)
+        product = Product.objects.create(product_name=data["product_name"], category=category, subcategory=subcategory, vendor=obj)
+        for attribute in data["attributes"]:
+            attribute_obj = Attribute.objects.get(id=attribute)
+            product.attributes.add(attribute_obj)
         product.save()
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
 class ProductDetailView(APIView):
-    def get(self, request, pk, prok):
+    permission_classes = [IsOwner]
+
+    def get_queryset(self,pk):
+        obj = Vendor.objects.get(id=pk)
+        self.check_object_permissions(self.request, obj)
+        pk = self.kwargs['pk']
         vendor = Vendor.objects.get(id=pk)
+        return vendor
+    
+    def get(self, request, pk, prok):
+        
         product = Product.objects.get(id=prok)
         serializer = ProductSerializer(product) 
         return Response(serializer.data)
 
     def put(self, request, pk, prok):
+        obj = Vendor.objects.get(id=pk)
+        self.check_object_permissions(self.request, obj)
         data=request.data
-        pk = self.kwargs.get('pk')
         product = Product.objects.get(id=prok)
         category = Category.objects.get(id=data["category"])
         subcategory = SubCategory.objects.get(id=data["subcategory"])
-        vendor = Vendor.objects.get(id=pk)
+        for attribute in data["attributes"]:
+            attribute_obj = Attribute.objects.get(id=attribute)
+            product.attributes.add(attribute_obj)
         product.category=category
         product.subcategory=subcategory
         serializer = ProductSerializer(product, data)
@@ -213,6 +231,8 @@ class ProductDetailView(APIView):
         return Response(serializer.data)
 
     def delete(self, request,pk, prok):
+        obj = Vendor.objects.get(id=pk)
+        self.check_object_permissions(self.request, obj)
         product = Product.objects.get(id=prok)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -20,6 +20,8 @@ class ApproveVendorSerializer(serializers.Serializer):
         fields = ['vendor_id']
 
 class SubCategorySerializer(serializers.ModelSerializer):
+    attribute = serializers.StringRelatedField(many = True)
+    product = serializers.StringRelatedField(many = True)
     class Meta:
         model= SubCategory
         fields = "__all__"
@@ -27,12 +29,14 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     subcategory = serializers.StringRelatedField(many = True)
+    product = serializers.StringRelatedField(many = True)
     class Meta:
         model= Category
         fields = "__all__"
     
 
 class AttributeSerializer(serializers.ModelSerializer):
+    product = serializers.StringRelatedField(many = True)
     class Meta:
         model= Attribute
         fields = "__all__"
@@ -42,12 +46,7 @@ class ProductSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(read_only = True)
     subcategory = serializers.StringRelatedField(read_only = True)
     vendor = serializers.StringRelatedField(read_only = True)
+    attribute = serializers.StringRelatedField(read_only = True)
     class Meta:
         model= Product
         fields = "__all__"
-
-    def validate_subcategory(self, category, subcategory):
-        if SubCategory.objects.filter(category=category).exists():
-            return subcategory
-        else:
-            raise serializers.ValidationError("sub category not found")
