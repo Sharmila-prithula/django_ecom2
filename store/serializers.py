@@ -49,22 +49,25 @@ class AttributeValueSerializer(serializers.ModelSerializer):
         model= AttributeValue
         fields = "__all__"
 
-class ProductSerializer(serializers.ModelSerializer):
-    category = serializers.StringRelatedField(read_only = True)
-    subcategory = serializers.StringRelatedField(read_only = True)
-    vendor = serializers.StringRelatedField(read_only = True)
-    attributes = serializers.StringRelatedField(many = True)
-    attributevalue = serializers.StringRelatedField(read_only = True, many = True)
-    productvariation = serializers.StringRelatedField(many = True, read_only = True)
-    class Meta:
-        model= Product
-        fields = "__all__"
 
 class VariantSerializer(serializers.ModelSerializer):
     option = serializers.StringRelatedField(many = True)
     class Meta:
         model= Variant
         fields = "__all__"
+        
+class ProductSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField(read_only = True)
+    subcategory = serializers.StringRelatedField(read_only = True)
+    vendor = serializers.StringRelatedField(read_only = True)
+    attributes = serializers.StringRelatedField(many = True, read_only = True)
+    attributevalue = serializers.StringRelatedField(read_only = True, many = True)
+    productvariation = serializers.StringRelatedField(many = True, read_only = True)
+    #variants = serializers.StringRelatedField(many = True)
+    class Meta:
+        model= Product
+        fields = "__all__"
+
 
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,6 +76,7 @@ class OptionSerializer(serializers.ModelSerializer):
 
 class ProductVariationSerializer(serializers.ModelSerializer):
     options = serializers.StringRelatedField(many = True, read_only = True)
+    product = serializers.StringRelatedField(read_only = True)
     class Meta:
         model= ProductVariation
         fields = "__all__"

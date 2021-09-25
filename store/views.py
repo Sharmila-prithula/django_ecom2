@@ -223,16 +223,16 @@ class AttributeValueDetailView(APIView):
         serializer = AttributeValueSerializer(attributevalue) 
         return Response(serializer.data)
 
-    def put(self, request, pk, prok, ak,avk):
+    def put(self, request, pk, prok, ak, avk):
+        data=request.data
         obj = Vendor.objects.get(id=pk)
         self.check_object_permissions(self.request, obj)
-        data=request.data
         attributevalue = AttributeValue.objects.get(id=avk)
         product = Product.objects.get(id=prok)
         attribute = Attribute.objects.get(id=ak)
         attributevalue.product = product
         attributevalue.attribute = attribute
-        serializer = AttributeValueSerializer(AttributeValue, data)
+        serializer = AttributeValueSerializer(attributevalue, data)
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
@@ -250,6 +250,7 @@ class VariantView(APIView):
         variant = Variant.objects.all() 
         serializer = VariantSerializer(variant, many=True) 
         return Response(serializer.data)
+    
 
 class OptionView(APIView):
     def get(self, request, pk):
@@ -270,6 +271,9 @@ class ProductVariationView(APIView):
         self.check_object_permissions(self.request, obj)
         product = Product.objects.get(id=prok)
         productvariation = ProductVariation.objects.create(product=product)
+        for variant in data["variants"]:
+            variant_obj = Variant.objects.get(id=variant)
+            productvariation.variants.add(variant_obj)
         for option in data["options"]:
             option_obj = Option.objects.get(id=option)
             productvariation.options.add(option_obj)
@@ -286,16 +290,20 @@ class ProductVariationDetailView(APIView):
         serializer = ProductVariationSerializer(productvariation) 
         return Response(serializer.data)
 
-    def patch(self, request, pk, prok, pvk):
+    def put(self, request, pk, prok, pvk):
         obj = Vendor.objects.get(id=pk)
         self.check_object_permissions(self.request, obj)
         data=request.data
         productvariation = ProductVariation.objects.get(id=pvk)
-        product = Product.objects.get(id=prok)
-        productvariation.product = product
+        product = Product.objects.get(id=prok)       
+        for variant in data["variants"]:
+            variant_obj = Variant.objects.get(id=variant)
+            productvariation.variants.add(variant_obj)
+        
         for option in data["options"]:
             option_obj = Option.objects.get(id=option)
             productvariation.options.add(option_obj)
+        productvariation.product = product
         serializer = ProductVariationSerializer(productvariation, data)
         serializer.is_valid(raise_exception=True)
 

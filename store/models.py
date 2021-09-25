@@ -77,6 +77,7 @@ class Option(models.Model):
 
 class ProductVariation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="productvariation")
+    variants = models.ManyToManyField(Variant, related_name="productvariation")
     options = models.ManyToManyField(Option, related_name="productvariation")
     price = models.IntegerField
     stock = models.IntegerField
