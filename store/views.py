@@ -270,7 +270,7 @@ class ProductVariationView(APIView):
         obj = Vendor.objects.get(id=pk)
         self.check_object_permissions(self.request, obj)
         product = Product.objects.get(id=prok)
-        productvariation = ProductVariation.objects.create(product=product)
+        productvariation = ProductVariation.objects.create(price=data["price"], stock=data["stock"], image=data["image"], product=product)
         for variant in data["variants"]:
             variant_obj = Variant.objects.get(id=variant)
             productvariation.variants.add(variant_obj)
