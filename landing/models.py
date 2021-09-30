@@ -68,17 +68,9 @@ class User(AbstractBaseUser, PermissionsMixin):
             'refresh': str(refresh),
             'access': str(refresh.access_token)
         }
-
-# @receiver(post_save, sender=User)
-# def send_email_token(sender, instance, created, **kwargs):
-#     if created:
-#         try: 
-#             subject = 'Your account needs to be verified'
-#             message = f'Paste the link to verify your account http://localhost:8000/{uuid.uuid4()}/'
-#             email_from = settings.EMAIL_HOST_USER
-#             recipient_list = [instance.email]
-#             send_mail(subject, message, email_from, recipient_list)
-
-#         except Exception as e:
-#             print(e)
-  
+class Shipping(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    address = models.CharField(max_length=200)
+    division = models.CharField(max_length=200)
+    contact_number = models.IntegerField(blank=True, null=True)

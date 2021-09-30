@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['localhost']
 AUTH_USER_MODEL = 'landing.User'
 # Application definition
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,6 +43,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'landing',
     'store',
+    'cart',
+    'order',
     'django.contrib.sites',
     'allauth',
     'allauth.account',

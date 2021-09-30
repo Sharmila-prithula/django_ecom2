@@ -20,6 +20,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('landing/', include('landing.urls')),
     path('store/', include('store.urls')),
+    path('cart/', include('cart.urls')),
     path('accounts/', include('allauth.urls')),
-    path('home/', TemplateView.as_view(template_name='dashboard/home.html'), name='home'), 
+    path('home/', TemplateView.as_view(template_name='dashboard/home.html'), name='home'),
+    path('login/', TemplateView.as_view(template_name='account/login.html'), name='home2'), 
 ]
