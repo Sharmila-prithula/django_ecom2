@@ -16,18 +16,17 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
 
-
-
 class OrderSerializer(serializers.ModelSerializer):
     #cart = CartSerializer()
-    orderitem = serializers.StringRelatedField(many = True)
+    orderitem = serializers.StringRelatedField(many = True, read_only = True)
     class Meta:
         model = Order
         fields = '__all__'
 
+
 class OrderItemSerializer(serializers.ModelSerializer):
-    #order = OrderSerializer()
-    productvariation = serializers.StringRelatedField(many = True)
+    order = OrderSerializer()
+    productvariation = ProductVariationSerializer(many = True, read_only = True)
 
     class Meta:
         model = OrderItem

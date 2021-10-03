@@ -78,8 +78,8 @@ class CartView(APIView):
 class OrderView(APIView):
     def get(self, request):
         user = request.user
-        order = Order.objects.filter(user=user)
-        serializer = OrderSerializer(order, many=True) 
+        queryset = Order.objects.filter(user=user)
+        serializer = OrderSerializer(queryset, many=True) 
         return Response(serializer.data)
 
     def post(self, request):

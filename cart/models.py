@@ -59,4 +59,4 @@ class OrderItem(models.Model):
     update = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
-        return str(self.order.user.username)+" order "+ str(self.order.id) + " productvariation "+str(self.productvariation.id)
+        return str(self.order.user.username)+" order "+ str(self.order.id) + " productvariation "+str(self.productvariation.product.product_name)

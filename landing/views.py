@@ -56,10 +56,10 @@ class RegisterView(APIView):
 class VerifyEmail(views.APIView):
     serializer_class = EmailVerificationSerializer
 
-    def get(self, request):
+    def get(self, request, token):
         try:
             serializer = self.serializer_class(data= request.data)
-            email_verification_token = request.data.get('email_verification_token', '')
+            email_verification_token = token
         
             user = User.objects.get(email_verification_token = email_verification_token)
             if user.is_verified:
@@ -74,7 +74,15 @@ class VerifyEmail(views.APIView):
 
 def send_mail_after_registration(email , token):
     subject = 'Your accounts need to be verified'
-    message = f'Hi paste the link to verify your account http://localhost:8000/landing/verify/{token}'
+    message = f'Hi paste the link to verify your account http://localhost:8000/landing/verify/{token}/'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [email]
+    send_mail(subject, message , email_from ,recipient_list )
+
+
+def send_mail_to_reset_password(email , token):
+    subject = 'Your password reset link'
+    message = f'Hi paste the link to reset your password http://localhost:8000/landing/password-reset/{token}/'
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email]
     send_mail(subject, message , email_from ,recipient_list )
@@ -116,7 +124,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
             tokenid = uidb64 + "/" + token
-            send_mail_after_registration(request.data['email'] , tokenid)
+            send_mail_to_reset_password(request.data['email'] , tokenid)
             return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
@@ -131,6 +139,7 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
             if not PasswordResetTokenGenerator().check_token(user, token):
                 return Response({'status' : 404, 'errors' :'Token is not valid. Request another one.'})                    
             return Response({'status' : 200, 'message' :'Token valid','uidb64':uidb64 })
+            
 
         except DjangoUnicodeDecodeError as identifier:
             if not PasswordResetTokenGenerator().check_token(user):

@@ -23,5 +23,5 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('accounts/', include('allauth.urls')),
     path('home/', TemplateView.as_view(template_name='dashboard/home.html'), name='home'),
-    path('login/', TemplateView.as_view(template_name='account/login.html'), name='home2'), 
+    #path('login/', TemplateView.as_view(template_name='account/login.html'), name='home2'), 
 ]

@@ -44,13 +44,12 @@ INSTALLED_APPS = [
     'landing',
     'store',
     'cart',
-    'order',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.facebook',
+    #'allauth.socialaccount.providers.facebook',
     'crispy_forms',
 ]
 
@@ -213,7 +212,7 @@ EMAIL_HOST_PASSWORD = 'prithula'
 CRISPY_TEMPLATE_PACK = 'bootstrap'
 LOGIN_REDIRECT_URL = 'home'
 
-ACCOUNT_LOGOUT_REDIRECT_URL = 'account_login'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'login'
 
 # ACCOUNT_EMAIL_REQUIRED = True
 
