@@ -52,7 +52,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.DO_NOTHING, related_name="orderitem")
-    productvariation = models.ForeignKey(ProductVariation, on_delete=models.CASCADE)
+    productvariation = models.ForeignKey(ProductVariation, on_delete=models.DO_NOTHING)
     price = models.FloatField(default=0)
     quantity = models.IntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True, null=True)

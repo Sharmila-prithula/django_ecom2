@@ -35,6 +35,34 @@ class VendorCreate(generics.CreateAPIView):
         send_mail(subject, message , email_from ,recipient_list )
         return Response({'success': 'created vendor. wait for admin approve'}, status=status.HTTP_200_OK)
 
+class VendorView(APIView):
+    permission_classes = [IsOwner]
+    def get(self, request):
+        vendor = Vendor.objects.filter(vendor_owner = request.user)
+        serializer = VendorSerializer(vendor, many=True) 
+        return Response(serializer.data)
+
+class VendorDetailView(APIView):
+    permission_classes = [IsOwner]
+
+    def put(self, request, pk):
+        obj = Vendor.objects.get(id=pk)
+        self.check_object_permissions(self.request, obj)
+        data=request.data
+        obj.vendor_name = data.get('vendor_name')
+        obj.description = data.get('description')
+        serializer = VendorSerializer(obj, data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request,pk):
+        obj = Vendor.objects.get(id=pk)
+        self.check_object_permissions(self.request, obj)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class ApproveVendorAPIView(generics.GenericAPIView):
     serializer_class = ApproveVendorSerializer
     permission_classes = (permissions.IsAdminUser,)

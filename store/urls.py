@@ -11,9 +11,11 @@ router.register("subcategories", SubCategoryViewSet, basename="subcategories")
 
 urlpatterns = [ 
     path('', include(router.urls)),
-    path('vendor/',VendorCreate.as_view(), name= 'create-vendor'),
+    path('vendorcreate/',VendorCreate.as_view(), name= 'create-vendor'),
+    path('vendors/',VendorView.as_view(), name= 'vendors'),
+    path('vendors/<int:pk>/',VendorDetailView.as_view(), name= 'vendor-detail'),
     path('approve-vendor/', ApproveVendorAPIView.as_view(), name= 'approve-vendor'),
-    path('<int:pk>/variants/',VariantView.as_view(), name= 'variant'),
+    path('variants/',VariantView.as_view(), name= 'variant'),
     path('<int:pk>/options/',OptionView.as_view(), name= 'option'),
     path('<int:pk>/products/', ProductView.as_view(), name='products'),
     path('<int:pk>/products/<int:prok>/', ProductDetailView.as_view(), name='products-details'),

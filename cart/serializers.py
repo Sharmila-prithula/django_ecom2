@@ -2,18 +2,18 @@ from rest_framework import serializers
 from .models import *
 from store.serializers import *
 
-class CartItemSerializer(serializers.ModelSerializer):
-    #cart = CartSerializer()
-    productvariation = ProductVariationSerializer()
-
-    class Meta:
-        model = CartItem
-        fields = '__all__'
-
 class CartSerializer(serializers.ModelSerializer):
     cartitem = serializers.PrimaryKeyRelatedField(many = True, read_only = True)
     class Meta:
         model = Cart
+        fields = '__all__'
+
+class CartItemSerializer(serializers.ModelSerializer):
+    cart = CartSerializer()
+    productvariation = ProductVariationSerializer()
+
+    class Meta:
+        model = CartItem
         fields = '__all__'
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     order = OrderSerializer()
-    productvariation = ProductVariationSerializer(many = True, read_only = True)
+    productvariation = ProductVariationSerializer()
 
     class Meta:
         model = OrderItem
