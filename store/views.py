@@ -1,14 +1,17 @@
 import re
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
+from rest_framework import pagination
 from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from rest_framework import viewsets
 from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework.response import Response
+from rest_framework import filters
 from rest_framework import status, views, permissions
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from landing.models import User
 from .serializers import *
@@ -86,7 +89,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
         category= Category.objects.all()
         return category
 
-
 class SubCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = SubCategorySerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -122,7 +124,6 @@ class SubCategoryViewSet(viewsets.ModelViewSet):
         serializer = SubCategorySerializer(instance)
 
         return Response(serializer.data)
-
 
 class AttributeViewSet(viewsets.ModelViewSet):
     serializer_class = AttributeSerializer
@@ -220,7 +221,6 @@ class ProductDetailView(APIView):
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
 class AttributeValueView(APIView):
     permission_classes = [IsOwner]
     def get(self, request,pk, prok, ak):
@@ -279,7 +279,6 @@ class VariantView(APIView):
         serializer = VariantSerializer(variant, many=True) 
         return Response(serializer.data)
     
-
 class OptionView(APIView):
     def get(self, request, pk):
         option = Option.objects.filter(variant=pk) 
@@ -344,3 +343,41 @@ class ProductVariationDetailView(APIView):
         productvariation = ProductVariation.objects.get(id=pvk)
         productvariation.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    def get_queryset(self):
+        product= Product.objects.all()
+        return product
+
+class ProductList(generics.ListAPIView):
+    # queryset = Review.objects.all()
+    serializer_class = ProductSerializer
+    # filter_backends = [filters.OrderingFilter]
+    # ordering_fields = ['created']   kaj koreeee
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['subcategory__subcategory_name', 'product_name', 'category__category_name', 'attributes__attributevalue__attributevalue_name' ]
+    def get_queryset(self):
+        return Product.objects.all()
+
+class ProductDetailLandingView(APIView):
+    
+    def get(self, request, prok):
+        
+        product = Product.objects.get(id=prok)
+        serializer = ProductSerializer(product) 
+        return Response(serializer.data)
+
+class ProductVariationLandingView(APIView):
+    def get(self, request, prok):
+        productvariation = ProductVariation.objects.filter(product=prok)
+        serializer = ProductVariationSerializer(productvariation, many=True) 
+        return Response(serializer.data)
+
+class ProductVariationDetailLandingView(APIView):
+    
+    def get(self, request, prok, pvk):
+        
+        productvariation = ProductVariation.objects.get(id=pvk)
+        serializer = ProductVariationSerializer(productvariation) 
+        return Response(serializer.data)
