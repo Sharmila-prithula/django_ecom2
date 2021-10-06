@@ -6,6 +6,7 @@ class Vendor(models.Model):
     vendor_name = models.CharField(max_length=200, unique=True, blank=False)
     vendor_owner = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=200, null=True)
+    due_payment = models.FloatField(default=0)
     active = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)

@@ -36,32 +36,6 @@ class CartView(APIView):
         serializer = CartItemSerializer(queryset, many = True)
         return Response(serializer.data)
 
-    # def put(self, request):
-    #     user = request.user
-    #     data = request.data
-    #     cart = Cart.objects.filter(user=user, ordered=False).first()
-
-    #     cart_item = CartItem.objects.get(id=data.get('id'))
-    #     #cart.total_price = cart.total_price-cart_item.price
-    #     #cart.save()
-    #     quan = data.get('quantity')
-    #     quantity = int(quan)
-    #     id= cart_item.productvariation.id
-    #     productvariation = ProductVariation.objects.get(id=id)
-    #     cart_item.quantity += quantity
-    #     # print (float(productvariation.price) * float(quantity))
-    #     # print(cart.total_price)
-    #     # if quantity>0:
-    #     #     cart.total_price += float(productvariation.price) * float(quantity)
-    #     # elif quantity<0:
-    #     cart.total_price += float(productvariation.price) * float(quantity)
-    #     #cart.total_price += cart_item.price
-    #     cart_item.save()
-    #     cart.save()
-    #     queryset = CartItem.objects.filter(cart=cart)
-    #     serializer = CartItemSerializer(queryset, many = True)
-    #     return Response(serializer.data)
-
     def put(self, request):
         user = request.user
         data = request.data
@@ -99,9 +73,6 @@ class CartView(APIView):
 class OrderView(APIView):
     def get(self, request):
         user = request.user
-        # queryset = Order.objects.filter(user=user)
-        # serializer = OrderSerializer(queryset, many=True) 
-        # return Response(serializer.data)
         order = Order.objects.filter(user=user).first()
         queryset = OrderItem.objects.filter(order=order)
         serializer = OrderItemSerializer(queryset, many = True)
@@ -118,7 +89,11 @@ class OrderView(APIView):
             if productvariation.stock < 0:
                 return Response({'status' : 404, 'errors' :productvariation.product.product_name +' is sold out'}) 
             productvariation.save()
+            product = Product.objects.get(productvariation=productvariation)
+            vendor = Vendor.objects.get(product=product)
+            vendor.due_payment += cartitem.price
             order.total_item = order.total_item + 1
+            vendor.save()
             orderitem= OrderItem.objects.create(order=order, productvariation=productvariation, quantity=cartitem.quantity, price=cartitem.price)
         order.save()
         for cartitem in cartitems:
